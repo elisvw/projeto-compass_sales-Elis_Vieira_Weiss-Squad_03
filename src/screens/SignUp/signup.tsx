@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
 import { Feather } from '@expo/vector-icons'
 import { useFonts, Roboto_500Medium } from "@expo-google-fonts/roboto";
+import { createUserWithEmailAndPassword, updateProfile, updateCurrentUser, getAuth } from "firebase/auth";
 
 export default function SignUp() {
     const { navigate } = useNavigation();
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [emailValid, setEmailValid] = useState(true);
+    const [passwordValid, setPasswordValid] = useState(true);
+    const auth = getAuth();
+    
     const [fontLoaded] = useFonts({
         Roboto_500Medium,
     });
@@ -13,7 +23,37 @@ export default function SignUp() {
     if (!fontLoaded) {
         return null;
     }
-    
+
+    const validateEmail = (text: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        setEmail(text);
+        setEmailValid(emailRegex.test(text));
+      };
+    const validatePassword = (text: string) => {
+        const passwordValid = text.length >= 6;
+        setPassword(text);
+        setPasswordValid(passwordValid);
+      };
+
+    const signUp = async () => {
+        setLoading(true);
+            if (!emailValid || !passwordValid) {
+            setLoading(false);
+            return;
+          }
+        try {
+            const response = await createUserWithEmailAndPassword(auth, email,password);
+            navigate('Login');
+            const user = response.user;
+            await updateProfile(user, {
+              displayName: name,
+            });
+        } catch (error: any) {
+            alert('Sign Up failed: ' + error.message)
+        } finally {
+            setLoading(false);
+        }
+    }
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -21,29 +61,34 @@ export default function SignUp() {
             </View>
             <View style={styles.telaInteira}>
                 <View style={styles.inputContainer}>
+                <TextInput value={name} placeholder="Name" style={styles.input} onChangeText={(text) => setName(text)} />
                 <TextInput 
-                placeholder="Name"
-                style={styles.input}
-                />
+                value={email} 
+                placeholder="Email" 
+                style={[styles.input, !emailValid && styles.inputError] }
+                onChangeText={(text) => validateEmail(text)} />
+                {!emailValid && <Text style={styles.errorMessage}>Not a valid email address. Should be your@email.com</Text>}
+
                 <TextInput 
-                placeholder="Email"
-                style={styles.input}
+                secureTextEntry={true}
+                value={password} 
+                placeholder="Password" 
+                style={[styles.input, !passwordValid && styles.inputError]}
+                onChangeText={(text) => validatePassword(text)}
                 />
-                <TextInput 
-                placeholder="Password"
-                style={styles.input}
-                />
+                {!passwordValid && <Text style={styles.errorMessage}>Your password must have atleast 6 characters.</Text>}
+
             </View>
-            <TouchableOpacity style={styles.login} onPress={() => {navigate('Login')}}>
-                <Text style={styles.text}>Already have an account?
-                <Feather name='arrow-right' color='#F31227'/>
-                </Text>
-            </TouchableOpacity>
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={() => {navigate('Login')}}>
-                    <Text style={styles.textButton}>SINGUP</Text>
-                </TouchableOpacity>
-            </View>
+                <TouchableOpacity style={styles.login} onPress={() => {navigate('Login')}}>
+                        <Text style={styles.text}>Already have an account?
+                        <Feather name='arrow-right' color='#F31227'/>
+                        </Text>
+                    </TouchableOpacity>
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity onPress={signUp}>
+                        <Text style={styles.textButton}>SING UP</Text>
+                        </TouchableOpacity>
+                    </View>
             </View>
         </View>
     )
@@ -86,8 +131,15 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'Roboto_500Medium'
     },
+    inputError: {
+        borderColor: 'red',
+    },
+    errorMessage: {
+        color: 'red',
+        fontSize: 12,
+    },
     login: {
-        marginLeft: 170,
+        marginLeft: 160,
         marginBottom: 20,
         flexDirection: 'row'
     },
@@ -105,4 +157,4 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     }
   });
-  
+

@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native'
+
 import { useFonts, Roboto_500Medium } from "@expo-google-fonts/roboto";
 import { Feather } from '@expo/vector-icons'
+import { sendPasswordResetEmail, getAuth } from 'firebase/auth'; 
 
 
 export default function ForgotPassword() {
     const { navigate } = useNavigation();
+    const [email, setEmail] = useState('');
+    const [emailValid, setEmailValid] = useState(true);
+    const auth  = getAuth();
+  
     const [fontLoaded] = useFonts({
         Roboto_500Medium,
     });
@@ -15,6 +21,30 @@ export default function ForgotPassword() {
         return null;
     }
 
+    const validateEmail = (text: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        setEmail(text);
+        setEmailValid(emailRegex.test(text));
+      };
+
+    const handleResetPassword = async () => {
+        if (email) {
+            try {
+                await sendPasswordResetEmail(auth, email); 
+                alert('Password reset email sent. Please check your inbox');
+                navigate('Login'); 
+            } catch (error: any) {
+                console.log(error);
+                alert('Failed to send the password reset email:' + error.message);
+            }
+        } else {
+        }
+    };
+
+    if (!fontLoaded) {
+        return null;
+    }
+  
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -25,15 +55,17 @@ export default function ForgotPassword() {
             </View>
             <View style={styles.telaInteira}>
                 <Text style={styles.text}>Please, enter your email address. 
-                ou will receive a link to create a new password via email.</Text>
+                You will receive a link to create a new password via email.</Text>
                 <View style={styles.inputContainer}>
                 <TextInput 
-                placeholder="Email"
-                 style={styles.input}
-                />
+                value={email} 
+                placeholder="Email" 
+                style={[styles.input, !emailValid && styles.inputError] }
+                onChangeText={(text) => validateEmail(text)} />
+                {!emailValid && <Text style={styles.errorMessage}>Not a valid email address. Should be your@email.com</Text>}
                 </View>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleResetPassword}>
                     <Text style={styles.textButton}>SEND</Text>
                 </TouchableOpacity>
             </View>
@@ -85,6 +117,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 16
+    },
+    inputError: {
+        borderColor: 'red',
+    },
+    errorMessage: {
+        color: 'red',
+        fontSize: 12,
     },
     buttonContainer: {
         width: '95%',

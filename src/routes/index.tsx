@@ -1,12 +1,14 @@
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useEffect } from 'react'
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useFonts, Roboto_500Medium } from "@expo-google-fonts/roboto";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import SignUp from "../screens/SignUp/signup";
 import Login from "../screens/Login/login";
 import ForgotPassword from "../screens/forgotpassword/forgotpassword";
 import Home from "../screens/home/home";
+
+
 
 const Stack = createNativeStackNavigator();
 
@@ -22,18 +24,10 @@ declare global {
     }
 
 export const Routes = () => {
-    const [fontLoaded] = useFonts({
-        Roboto_500Medium,
-    });
-    
-    if (!fontLoaded) {
-        return null;
-    }
-
     return (
         <NavigationContainer>
             <Stack.Navigator>
-                <Stack.Screen name='Sign Up' component={SignUp} options={{headerShown: false}}/>
+                <Stack.Screen name='SignUp' component={SignUp} options={{headerShown: false}}/>
                 <Stack.Screen name='Login' component={Login} options={{headerShown: false}}/>
                 <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{headerShown: false}}/>
                 <Stack.Screen name='Home' component={Home} options={{headerShown: false}}/>
