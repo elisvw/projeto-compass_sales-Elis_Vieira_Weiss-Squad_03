@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-nativ
 import { useNavigation } from '@react-navigation/native'
 import { Feather } from '@expo/vector-icons'
 import { useFonts, Roboto_500Medium } from "@expo-google-fonts/roboto";
-import { createUserWithEmailAndPassword, updateProfile, updateCurrentUser, getAuth } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, getAuth } from "firebase/auth";
 
 export default function SignUp() {
     const { navigate } = useNavigation();
