@@ -17,7 +17,7 @@
 
 <h2>💻 Tech Stack</h2>
 <ul>
-    <li>Typescript.
+    <li>TypeScript.
     <li>React Native.
 </ul>
 
