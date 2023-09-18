@@ -15,7 +15,7 @@ export default function SignUp() {
     const [emailValid, setEmailValid] = useState(true);
     const [passwordValid, setPasswordValid] = useState(true);
     const auth = getAuth();
-    
+
     const [fontLoaded] = useFonts({
         Roboto_500Medium,
     });
